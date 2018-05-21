@@ -1,5 +1,5 @@
-% % 
-% % 
+% % % 
+% % % 
 fprintf('\n Reading Training Data\n')
 % trainPath='./rvl-sorted-small/754x1000/100/Train';
 trainPath='/Volumes/Parhai/Parhai/LUMS/Semester 4 Spring18/Thesis 2/Datasets/AI/Train/';
@@ -135,10 +135,10 @@ fprintf('\n Accuracy = %.2f %%\n', accuracy);
 
 
 
-%  Calculating Confusion Matrix
+% %  Calculating Confusion Matrix
 [resultCount, columnCount] = size(Result);
 % ConfusionMatrix = cell(3, 3);
-ConfusionMatrix = {0,0,0 ; 0,0,0 ; 0,0,0};
+ConfusionMatrix = {0,0,0,0 ; 0,0,0,0 ; 0,0,0,0 ; 0,0,0,0};
 
 row=0;
 col=0;
@@ -149,6 +149,8 @@ for i = 1:resultCount
         row = 2;
     elseif strcmp(Result{i,1}, 'WS8')
         row = 3;
+    elseif strcmp(Result{i,1}, 'WS10')
+        row = 4;
     end
     if strcmp(Result{i,2}, 'WS6')
         col = 1;
@@ -156,6 +158,8 @@ for i = 1:resultCount
         col = 2;
     elseif strcmp(Result{i,2}, 'WS8')
         col = 3;
+    elseif strcmp(Result{i,2}, 'WS10')
+        col = 4;
     end
    
     ConfusionMatrix{row, col} = ConfusionMatrix{row, col} + 1;
