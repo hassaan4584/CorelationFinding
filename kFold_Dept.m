@@ -60,10 +60,21 @@ end
 
 K = 5;
 batcheSize = int32(totalImagesCount/K);
+% Results = cell(0,0);
 
-Train = NewData;
-Test = Train((batcheSize*(3))+1: batcheSize*4, :);
-Train((batcheSize*(3))+1: batcheSize*4, :) = [];
+for i=0:1
+
+    Train = NewData;
+    range = (batcheSize*(i))+1: batcheSize*(i+1); % Test data range
+    Test = Train(range, :); % Separating Testing data
+    Train(range, :) = []; % Train = NewData - Test
+    
+%     a = Corr_function(Train, Test);
+%     fprintf('function returned\n');
+%     Results(range, :) = a;
+end
+
+
 
 trainImagesCount = size(Train);
 trainImagesCount = trainImagesCount(1);
@@ -84,12 +95,18 @@ end
 [A, OriginalTrainingOrder] = sort(TestCor, 2, 'descend');
 Result = cell(testImagesCount, 2);
 correctlyPredicted = 0;
+Result(1, 1) = {'Test Class'};
+Result(1, 2) = {'Predicted Class'};
+Result(1, 3) = {'Test Class Name'};
+Result(1, 4) = {'Predicted Class Name'};
+
+kNN = 9;
 for i = 1:testImagesCount
-    Result(i, 1) = Test(i, 2); % Test Image
-    Result(i, 2) = Train(OriginalTrainingOrder(i, 1), 2); % Closet Train Image
-    Result(i, 3) = Test(i, 3); % Test Image Name
-    Result(i, 4) = Train(OriginalTrainingOrder(i, 1), 3); % Closest Train Image Name
-    if strcmp(Result(i, 1), Result(i, 2)) == 1
+    Result(i+1, 1) = Test(i, 2); % Test Image
+    Result(i+1, 2) = Train(OriginalTrainingOrder(i, 1), 2); % Closet Train Image
+    Result(i+1, 3) = Test(i, 3); % Test Image Name
+    Result(i+1, 4) = Train(OriginalTrainingOrder(i, 1), 3); % Closest Train Image Name
+    if strcmp(Result(i+1, 1), Result(i+1, 2)) == 1
        correctlyPredicted = correctlyPredicted + 1; 
     end
 end
@@ -108,7 +125,7 @@ ConfusionMatrix = {0,0 ; 0,0};
 
 row=0;
 col=0;
-for i = 1:resultCount
+for i = 2:resultCount
     if strcmp(Result{i,1}, 'RO-GE')
         row = 1;
     elseif strcmp(Result{i,1}, 'RO-GG')
