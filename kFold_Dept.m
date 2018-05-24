@@ -1,109 +1,74 @@
-% % % 
-% % % 
-fprintf('\n Reading Training Data\n')
-% trainPath='./rvl-sorted-small/754x1000/100/Train';
-trainPath='/Volumes/Parhai/Parhai/LUMS/Semester 4 Spring18/Thesis 2/Datasets/Dept/Train/';
+fprintf('\n Reading All Data\n')
+allDataPath='/Volumes/Parhai/Parhai/LUMS/Semester 4 Spring18/Thesis 2/Datasets/Dept-kFold/';
 
-trainFolderContents = dir(trainPath);
-count = size(trainFolderContents);
-trainClasses = cell(5, 1);
+allDataFolderContents = dir(allDataPath);
+count = size(allDataFolderContents);
+allDataClasses = cell(0, 0);
 
 % Reading class names
-for i = 3:count(1)
-   if trainFolderContents(i, 1).isdir == 1
-       trainClasses{i, 1} = trainFolderContents(i, 1).name;
+numberOfClasses = 0;
+for i = 1:count(1)
+   if allDataFolderContents(i, 1).isdir == 1 && (strcmp(allDataFolderContents(i, 1).name, '.')== 0)
+       if (strcmp(allDataFolderContents(i, 1).name, '..')== 0)
+            numberOfClasses = numberOfClasses+1;
+            allDataClasses{numberOfClasses, 1} = allDataFolderContents(i, 1).name;
+       end
    end
 end 
 
-imageShape = [1000, 754];
-% imageShape = [1000, 762];
 
-TrainImageSizes = cell(1, 1);
-% % %  Reading Train Data
-Train = cell(50, 2);
-trainImagesCount=0;
+imageShape = [3696, 2574];
+TrainImageSizes = cell(0, 0);
+% % %  Reading Data 
+Data = cell(0, 0);
+totalImagesCount=0;
 
-for i = 3:count(1)
-    if trainFolderContents(i, 1).isdir == 1 
-        trainClasses{i, 1} = trainFolderContents(i, 1).name;
-        classPath = strcat(trainPath, '/', trainClasses{i, 1});
-        classContents = dir(classPath);
-        imageCount = size(classContents);
-        for j = 1:imageCount(1)
-            if classContents(j, 1).isdir == 0  && (strcmp(classContents(j, 1).name, '.DS_Store')== 0)
-                trainImageName = classContents(j, 1).name;
-                imagePath = strcat(classPath, '/', trainImageName);
-                try
-                    temp = imread(char(imagePath));
-                    temp = rgb2gray(temp);
-                    image_shape = size(temp);
-%                     if image_shape(1) == imageShape(1) && image_shape(2) == imageShape(2)
-                        trainImagesCount = trainImagesCount + 1;
+% Open and Read Images
+for i = 1:numberOfClasses
+    classPath = strcat(allDataPath, '/', allDataClasses{i, 1});
+    classContents = dir(classPath);
+    imageCount = size(classContents);
+    for j = 1:imageCount(1)
+        if classContents(j, 1).isdir == 0  && (strcmp(classContents(j, 1).name, '.DS_Store')== 0)
+            trainImageName = classContents(j, 1).name;
+            imagePath = strcat(classPath, '/', trainImageName);
+            try
+                temp = imread(char(imagePath));
+                temp = rgb2gray(temp);
+                image_shape = size(temp);
+                if image_shape(1) == imageShape(1) && image_shape(2) == imageShape(2)
+                    totalImagesCount = totalImagesCount + 1;
+                    Data{totalImagesCount, 1} = temp;
+                    Data{totalImagesCount, 2} = allDataClasses{i, 1};
+                    Data{totalImagesCount, 3} = trainImageName;
 
-                        Train{trainImagesCount, 1} = temp;
-                        Train{trainImagesCount, 2} = trainClasses{i, 1};
-
-                        TrainImageSizes {trainImagesCount, 1} = image_shape(1);
-                        TrainImageSizes {trainImagesCount, 2} = image_shape(2);
-                        
-%                     end
-                catch
-                    fprintf('j=%i, imagePath=%s , \n', j, imagePath)
                 end
-           end
+            catch
+                fprintf('j=%i, imagePath=%s , \n', j, imagePath)
+            end
        end
    end
 end
 
-
-
-fprintf('\n Reading Test Data\n')
-
-% testPath='./rvl-sorted-small/754x1000/100/Test';
-testPath='/Volumes/Parhai/Parhai/LUMS/Semester 4 Spring18/Thesis 2/Datasets/Dept/Test/';
-testFolderContents = dir(testPath);
-testCount = size(testFolderContents);
-testClasses = cell(5, 1);
-
-% % % Reading class names
-for i = 3:testCount(1)
-   if testFolderContents(i, 1).isdir == 1
-       testClasses{i, 1} = testFolderContents(i, 1).name;
-   end
+randomSequence = randperm(totalImagesCount)';
+NewData = cell(0, 0);
+for i=1: totalImagesCount
+    j = randomSequence(i);
+    NewData(j, :) = Data(i, :);
 end
 
-Test = cell(1, 2);
-testImagesCount=0;
 
-for i = 3:testCount(1)
-    if testFolderContents(i, 1).isdir == 1 
-        testClasses{i, 1} = testFolderContents(i, 1).name;
-        testClassPath = strcat(testPath, '/', testClasses{i, 1});
-        testClassContents = dir(testClassPath);
-        imageCount = size(testClassContents);
-        imagesInFolder = imageCount(1);
-%         imagesInFolder = 2+500;
-        for j = 3:imagesInFolder
-            if testClassContents(j, 1).isdir == 0 && (strcmp(classContents(j, 1).name, '.DS_Store')== 0)
-                imageName = testClassContents(j, 1).name;
-                imagePath = strcat(testClassPath, '/', imageName);
-                try
-                    temp = imread(char(imagePath));
-                    temp = rgb2gray(temp);
-                    image_shape = size(temp);
-                    
-    %                 if image_shape(1) == imageShape(1) && image_shape(2) == imageShape(2)
-                        testImagesCount = testImagesCount + 1;
-                        Test{testImagesCount, 1} = temp;
-                        Test{testImagesCount, 2} = testClasses{i, 1};
-    %                 end
-                catch
-                    fprintf('j=%i, imagePath=%s , \n', j, imagePath)
-                end                    
-           end
-        end
-   end
-end
+K = 5;
+batcheSize = int32(totalImagesCount/K);
+
+Train = NewData;
+Test = Train((batcheSize*(3))+1: batcheSize*4, :);
+Train((batcheSize*(3))+1: batcheSize*4, :) = [];
+
+trainImagesCount = size(Train);
+trainImagesCount = trainImagesCount(1);
+testImagesCount = size(Test);
+testImagesCount = testImagesCount(1);
 
 
 fprintf('\n Calculating Corelation Matrix\n')
@@ -120,8 +85,10 @@ end
 Result = cell(testImagesCount, 2);
 correctlyPredicted = 0;
 for i = 1:testImagesCount
-    Result(i, 1) = Test(i, 2);
-    Result(i, 2) = Train(OriginalTrainingOrder(i, 1), 2);
+    Result(i, 1) = Test(i, 2); % Test Image
+    Result(i, 2) = Train(OriginalTrainingOrder(i, 1), 2); % Closet Train Image
+    Result(i, 3) = Test(i, 3); % Test Image Name
+    Result(i, 4) = Train(OriginalTrainingOrder(i, 1), 3); % Closest Train Image Name
     if strcmp(Result(i, 1), Result(i, 2)) == 1
        correctlyPredicted = correctlyPredicted + 1; 
     end
@@ -137,7 +104,6 @@ fprintf('\n Accuracy = %.2f %%\n', accuracy);
 
 % %  Calculating Confusion Matrix
 [resultCount, columnCount] = size(Result);
-% ConfusionMatrix = cell(3, 3);
 ConfusionMatrix = {0,0 ; 0,0};
 
 row=0;
@@ -147,27 +113,15 @@ for i = 1:resultCount
         row = 1;
     elseif strcmp(Result{i,1}, 'RO-GG')
         row = 2;
-    elseif strcmp(Result{i,1}, 'WS8')
-        row = 3;
-    elseif strcmp(Result{i,1}, 'WS10')
-        row = 4;
     end
     if strcmp(Result{i,2}, 'RO-GE')
         col = 1;
     elseif strcmp(Result{i,2}, 'RO-GG')
         col = 2;
-    elseif strcmp(Result{i,2}, 'WS8')
-        col = 3;
-    elseif strcmp(Result{i,2}, 'WS10')
-        col = 4;
     end
    
     ConfusionMatrix{row, col} = ConfusionMatrix{row, col} + 1;
 end
     ConfusionMatrix
-% 
-
-
-
 
 
