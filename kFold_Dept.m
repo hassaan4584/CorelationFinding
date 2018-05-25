@@ -60,9 +60,9 @@ end
 
 K = 5;
 batcheSize = int32(totalImagesCount/K);
-% Results = cell(0,0);
+Results = cell(0,0);
 
-for i=0:1
+for i=0:0
 
     Train = NewData;
     range = (batcheSize*(i))+1: batcheSize*(i+1); % Test data range
@@ -100,10 +100,25 @@ Result(1, 2) = {'Predicted Class'};
 Result(1, 3) = {'Test Class Name'};
 Result(1, 4) = {'Predicted Class Name'};
 
-kNN = 9;
+kNN = 1;
 for i = 1:testImagesCount
     Result(i+1, 1) = Test(i, 2); % Test Image
-    Result(i+1, 2) = Train(OriginalTrainingOrder(i, 1), 2); % Closet Train Image
+    for j=1:kNN
+        NN(j) = Train(OriginalTrainingOrder(i, j), 2); 
+    end
+    GE_count=0;
+    for k=1:kNN
+        if strcmp(NN(j), 'RO-GE')
+            GE_count = GE_count + 1;
+        end
+    end
+    if GE_count > kNN/2
+        Result(i+1, 2) = {'RO-GE'};
+    else
+        Result(i+1, 2) = {'RO-GG'};
+    end
+        
+%     Result(i+1, 2) = Train(OriginalTrainingOrder(i, 1), 2); % Closet Train Image
     Result(i+1, 3) = Test(i, 3); % Test Image Name
     Result(i+1, 4) = Train(OriginalTrainingOrder(i, 1), 3); % Closest Train Image Name
     if strcmp(Result(i+1, 1), Result(i+1, 2)) == 1
